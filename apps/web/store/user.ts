@@ -2,6 +2,7 @@ import { axiosInstance } from "@/lib/axios";
 import { User, UserType } from "@/types";
 import axios from "axios";
 import Cookies from "js-cookie";
+import { toast } from "sonner";
 import { create } from "zustand";
 
 type AuthStoreTypes = {
@@ -38,9 +39,11 @@ export const useAuthStore = create<AuthStoreTypes>((set, get) => ({
       const response = await axiosInstance.post("/signin", userDetails);
       if (response.status == 200) {
         set({ isLoginIn: true, isLoading: false });
+        toast.success("Logged In Successfully");
         return true;
       } else {
         set({ isLoginIn: false, isLoading: false });
+        toast.success(response.data.message);
         return false;
       }
     } catch (error) {
@@ -54,6 +57,7 @@ export const useAuthStore = create<AuthStoreTypes>((set, get) => ({
     try {
       const response = await axiosInstance.post("/logout");
       if (response.status == 200) {
+        toast.success("Signed Out Successfully");
         return true;
       } else {
         return false;

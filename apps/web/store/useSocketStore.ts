@@ -35,7 +35,6 @@ export const useSocketStore = create<UseSocketStoreTypes>((set, get) => ({
     }
   },
   setOnlineUsers: (userIds: string[]) => {
-    console.log(userIds);
     set({ onlineUsers: userIds });
   },
 }));

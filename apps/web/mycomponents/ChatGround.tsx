@@ -3,12 +3,13 @@ import { Button } from "@/components/ui/button";
 import { Send, Smile } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import React, { useEffect, useState } from "react";
-import Cookies from "js-cookie";
 import { Chat, User } from "@/types";
 import { Input } from "@/components/ui/input";
 import { useChatStore } from "@/store/useChatStore";
 import { formatMessageTime } from "@/lib/utils";
 import { useSocketStore } from "@/store/useSocketStore";
+import { toast } from "sonner";
+import { axiosInstance } from "@/lib/axios";
 
 interface ChatProps {
   user: User;
@@ -22,19 +23,18 @@ const ChatGround = ({ user, socket }: ChatProps) => {
   const selectedUser = useChatStore((state) => state.selectedUser);
   const setSelectedUser = useChatStore((state) => state.setSelectedUser);
 
-  const { getMessages, messages, setMessages } = useChatStore();
+  const { getMessages, messages, setMessages, clearMessages } = useChatStore();
   const setOnlineUsers = useSocketStore((state) => state.setOnlineUsers);
 
   // roomId Creation
   const roomId = [user?.username, selectedUser?.username].sort().join("-");
-  const token = Cookies.get("token");
 
   //getting messages
   useEffect(() => {
     getMessages(roomId);
-    // return () => {
-    //   setMessages("");
-    // };
+    return () => {
+      clearMessages();
+    };
   }, [roomId]);
 
   //send messages
@@ -61,20 +61,14 @@ const ChatGround = ({ user, socket }: ChatProps) => {
   };
 
   //create room in db
-  // const createRoom = async () => {
-  //   const response = await fetch("http://localhost:5050/createroom", {
-  //     method: "POST",
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //       Authorization: `Bearer ${token}`,
-  //     },
-  //     body: JSON.stringify({ slug: roomId }),
-  //   });
-  //   const data = await response.json();
-  //   if (response.ok) {
-  //     // console.log(data);
-  //   }
-  // };
+  const createRoom = async () => {
+    const response = await axiosInstance.post("/createroom", {
+      slug: roomId,
+    });
+    if (response.status == 200) {
+      toast.success(response.data.message);
+    }
+  };
 
   // status update
   useEffect(() => {
@@ -98,8 +92,9 @@ const ChatGround = ({ user, socket }: ChatProps) => {
         })
       );
     }
-    console.log("joined socket");
-    // createRoom();
+
+    createRoom();
+    console.log("joined room called");
   }, [selectedUser, user, socket]);
 
   // message events
@@ -147,6 +142,7 @@ const ChatGround = ({ user, socket }: ChatProps) => {
       };
     }
   }, [socket]);
+  console.log(selectedUser?.id);
 
   return (
     <>
@@ -160,7 +156,7 @@ const ChatGround = ({ user, socket }: ChatProps) => {
               <div
                 className={`flex gap-2 ${mes.senderId === user.id ? "flex-row-reverse space-x-reverse" : ""}`}
               >
-                {mes.senderId != user.id && (
+                {mes.receiverId == user.id && (
                   <Avatar className='size-10'>
                     <AvatarFallback className='bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-xs'>
                       {mes.senderId != user.id &&

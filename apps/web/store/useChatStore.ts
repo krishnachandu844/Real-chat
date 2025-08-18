@@ -16,6 +16,7 @@ type userChatStoreTypes = {
   getMessages: (roomId: string) => void;
   setSelectedUser: (user: UserType | null) => void;
   setMessages: (mes: Chat) => void;
+  clearMessages: () => void;
 };
 
 export const useChatStore = create<userChatStoreTypes>((set, get) => ({
@@ -51,4 +52,5 @@ export const useChatStore = create<userChatStoreTypes>((set, get) => ({
   //Setting Specific User
   setSelectedUser: (user) => set({ selectedUser: user }),
   setMessages: (mes: Chat) => set({ messages: [...get().messages, mes] }),
+  clearMessages: () => set({ messages: [] }),
 }));

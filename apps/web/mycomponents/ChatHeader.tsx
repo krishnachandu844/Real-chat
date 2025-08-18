@@ -1,11 +1,13 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useChatStore } from "@/store/useChatStore";
+import { useSocketStore } from "@/store/useSocketStore";
 
 import { MoreVertical, Phone, Video } from "lucide-react";
 
 const ChatHeader = () => {
   const selectedUser = useChatStore((state) => state.selectedUser);
+  const { onlineUsers } = useSocketStore();
   if (!selectedUser) {
     return;
   }
@@ -21,20 +23,16 @@ const ChatHeader = () => {
             </Avatar>
             <div
               className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-slate-800 ${
-                selectedUser.Status === "online"
+                onlineUsers.includes(selectedUser.id)
                   ? "bg-green-500"
-                  : selectedUser.Status === "away"
-                    ? "bg-yellow-500"
-                    : selectedUser.Status === "busy"
-                      ? "bg-red-500"
-                      : "bg-gray-500"
+                  : "bg-red-500"
               }`}
             />
           </div>
           <div>
             <h3 className='text-white font-medium'>{selectedUser.username}</h3>
             <p className='text-slate-400 text-sm capitalize'>
-              {selectedUser.Status}
+              {onlineUsers.includes(selectedUser.id) ? "online" : "offline"}
             </p>
           </div>
         </div>

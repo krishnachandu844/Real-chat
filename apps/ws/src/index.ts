@@ -53,12 +53,11 @@ wss.on("connection", async function connection(ws, req) {
     console.log(error);
   }
 
-  ws.on("message", function (data) {
+  ws.on("message", async function (data) {
     try {
       const parsedData = JSON.parse(data.toString());
       switch (parsedData.type) {
         case "status-update":
-          console.log("status");
           broadcastOnlineUsers();
           break;
         case "join":
@@ -66,7 +65,7 @@ wss.on("connection", async function connection(ws, req) {
           if (room) {
             room.roomId = parsedData.roomId;
           }
-          console.log("joined Room");
+
           break;
         case "chat":
           const { roomId, message, receiverId } = parsedData;
@@ -81,13 +80,28 @@ wss.on("connection", async function connection(ws, req) {
               })
             );
           });
+          try {
+            const savedMessage = await db.chat.create({
+              data: {
+                message,
+                senderId: currentUserId,
+                receiverId,
+                roomId,
+                Status: "Sent", // start as Sent
+              },
+            });
+            console.log(`sent message to ${currentUserId} to ${receiverId}`);
+          } catch (error) {
+            console.error("Error saving message:", error);
+          }
       }
-    } catch (error) {}
+    } catch (error) {
+      console.log(error);
+    }
   });
 
   // Websocket closed
   ws.on("close", async () => {
-    console.log("closed");
     onlineUsers = onlineUsers.filter((user) => user.userId !== currentUserId);
     broadcastOnlineUsers();
   });

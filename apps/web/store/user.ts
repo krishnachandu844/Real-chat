@@ -1,7 +1,5 @@
 import { axiosInstance } from "@/lib/axios";
-import { User, UserType } from "@/types";
-import axios from "axios";
-import Cookies from "js-cookie";
+import { User } from "@/types";
 import { toast } from "sonner";
 import { create } from "zustand";
 
@@ -23,7 +21,6 @@ export const useAuthStore = create<AuthStoreTypes>((set, get) => ({
   isLoading: false,
   user: null,
   onlineUsers: [],
-  socket: null,
 
   getUser: async () => {
     const response = await axiosInstance.get("/me");
@@ -58,6 +55,7 @@ export const useAuthStore = create<AuthStoreTypes>((set, get) => ({
       const response = await axiosInstance.post("/logout");
       if (response.status == 200) {
         toast.success("Signed Out Successfully");
+
         return true;
       } else {
         return false;

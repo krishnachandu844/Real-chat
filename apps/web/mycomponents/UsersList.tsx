@@ -28,7 +28,7 @@ export default function UsersList() {
   const selectedUser = useChatStore((state) => state.selectedUser);
   const setSelectedUser = useChatStore((state) => state.setSelectedUser);
 
-  const { disconnectSocket, onlineUsers } = useSocketStore();
+  const { onlineUsers } = useSocketStore();
   const { logout } = useAuthStore();
 
   const userRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -61,30 +61,30 @@ export default function UsersList() {
   }
 
   return (
-    <div className='w-80 bg-slate-800 border-r border-slate-700 flex flex-col'>
+    <div className="w-80 bg-slate-800 border-r border-slate-700 flex flex-col">
       {/* Header */}
-      <div className='p-4 border-b border-slate-700'>
-        <div className='flex items-center justify-between mb-4'>
-          <div className='flex items-center space-x-3'>
-            <div className='p-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg'>
-              <MessageCircle className='h-6 w-6 text-white' />
+      <div className="p-4 border-b border-slate-700">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center space-x-3">
+            <div className="p-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg">
+              <MessageCircle className="h-6 w-6 text-white" />
             </div>
-            <h1 className='text-xl font-bold text-white'>ChatPro</h1>
+            <h1 className="text-xl font-bold text-white">ChatPro</h1>
           </div>
-          <div className='flex items-center space-x-4'>
+          <div className="flex items-center space-x-4">
             <HoverCard>
               <HoverCardTrigger>
-                <User className='text-white' />
+                <User className="text-white" />
               </HoverCardTrigger>
-              <HoverCardContent className='bg-slate-800'>
-                <div className='flex gap-2 items-center'>
-                  <Avatar className='h-10 w-10'>
+              <HoverCardContent className="bg-slate-800">
+                <div className="flex gap-2 items-center">
+                  <Avatar className="h-10 w-10">
                     {/* <AvatarImage src={user?.avatar || "/placeholder.svg"} /> */}
-                    <AvatarFallback className='size-10 text-xl bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg text-white'>
+                    <AvatarFallback className="size-10 text-xl bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg text-white">
                       {user?.username.charAt(0)}
                     </AvatarFallback>
                   </Avatar>
-                  <p className='text-white font-medium text-base'>
+                  <p className="text-white font-medium text-base">
                     {user?.username}
                   </p>
                 </div>
@@ -92,36 +92,35 @@ export default function UsersList() {
             </HoverCard>
 
             <Button
-              variant='ghost'
-              size='sm'
+              variant="ghost"
+              size="sm"
               onClick={() => {
                 logout();
-                disconnectSocket();
                 window.location.href = "/login";
               }}
-              className='text-white  hover:bg-slate-700 hover:text-white'
+              className="text-white  hover:bg-slate-700 hover:text-white"
             >
-              <LogOut className='h-4 w-4' />
+              <LogOut className="h-4 w-4" />
             </Button>
           </div>
           {/* userDetails */}
         </div>
 
         {/* Search */}
-        <div className='relative'>
-          <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4' />
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
           <Input
-            placeholder='Search conversations...'
+            placeholder="Search conversations..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className='pl-10 bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400'
+            className="pl-10 bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400"
           />
         </div>
       </div>
 
       {/* Conversations List */}
-      <div className='flex-1 overflow-y-auto'>
-        <div className='p-2'>
+      <div className="flex-1 overflow-y-auto">
+        <div className="p-2">
           {filteredUsers.map((user, index) => (
             <div
               key={index}
@@ -137,29 +136,29 @@ export default function UsersList() {
                   : "hover:bg-slate-700/50"
               }`}
             >
-              <div className='relative'>
-                <Avatar className='h-12 w-12'>
+              <div className="relative">
+                <Avatar className="h-12 w-12">
                   {/* <AvatarImage src={ || "/placeholder.svg"} /> */}
-                  <AvatarFallback className='bg-gradient-to-r from-blue-500 to-cyan-500 text-white'>
+                  <AvatarFallback className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white">
                     {user.username.charAt(0)}
                   </AvatarFallback>
                 </Avatar>
                 {/* Status Badge */}
                 {onlineUsers.includes(user.id) ? (
                   <span
-                    className='absolute bottom-0 right-0 size-3 bg-green-500 
-                  rounded-full ring-1 ring-zinc-900'
+                    className="absolute bottom-0 right-0 size-3 bg-green-500 
+                  rounded-full ring-1 ring-zinc-900"
                   />
                 ) : (
                   <span
-                    className='absolute bottom-0 right-0 size-3 bg-red-500 
-                  rounded-full ring-1 ring-zinc-600'
+                    className="absolute bottom-0 right-0 size-3 bg-red-500 
+                  rounded-full ring-1 ring-zinc-600"
                   />
                 )}
               </div>
-              <div className='flex-1 min-w-0'>
-                <div className='flex items-center justify-between'>
-                  <p className='text-white font-medium truncate'>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between">
+                  <p className="text-white font-medium truncate">
                     {user.username}
                   </p>
                   {/* {contact.lastMessageTime && (

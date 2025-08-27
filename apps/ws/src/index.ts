@@ -57,9 +57,12 @@ wss.on("connection", async function connection(ws, req) {
     try {
       const parsedData = JSON.parse(data.toString());
       switch (parsedData.type) {
+        //Status-update
         case "status-update":
           broadcastOnlineUsers();
           break;
+
+        //Room Join
         case "join":
           const room = rooms.find((x) => x.socket === ws);
           if (room) {
@@ -67,33 +70,76 @@ wss.on("connection", async function connection(ws, req) {
           }
 
           break;
+
+        //Chat
         case "chat":
-          const { roomId, message, receiverId } = parsedData;
-          const targetrooms = rooms.filter(
-            (room) => room.roomId === roomId && room.socket != ws
-          );
-          targetrooms.map((room) => {
-            room.socket.send(
+          {
+            const { roomId, message, receiverId } = parsedData;
+            const targetrooms = rooms.filter(
+              (room) => room.roomId === roomId && room.socket != ws
+            );
+            targetrooms.map((room) => {
+              room.socket.send(
+                JSON.stringify({
+                  type: "message",
+                  message,
+                  roomId,
+                  senderId: currentUserId,
+                  receiverId,
+                })
+              );
+            });
+            try {
+              // const savedMessage = await db.chat.create({
+              //   data: {
+              //     message,
+              //     senderId: currentUserId,
+              //     receiverId,
+              //     roomId,
+              //     Status: "Sent", // start as Sent
+              //   },
+              // });
+            } catch (error) {
+              console.error("Error saving message:", error);
+            }
+          }
+          break;
+
+        // Request Video call
+        case "Request-for-video-call":
+          {
+            const { receiverId } = parsedData;
+            console.log(receiverId);
+            const room = rooms.find((x) => x.userId == receiverId);
+            console.log(room);
+            room?.socket.send(
               JSON.stringify({
-                type: "message",
-                message,
+                type: "Request-for-video-call",
+                receiverId,
               })
             );
-          });
-          try {
-            const savedMessage = await db.chat.create({
-              data: {
-                message,
-                senderId: currentUserId,
-                receiverId,
-                roomId,
-                Status: "Sent", // start as Sent
-              },
-            });
-            console.log(`sent message to ${currentUserId} to ${receiverId}`);
-          } catch (error) {
-            console.error("Error saving message:", error);
+            console.log("request sent");
           }
+          break;
+
+        // Sending offer
+        case "offer":
+          {
+            const { receiverId, offer } = parsedData;
+            const room = rooms.find((x) => x.userId == receiverId);
+            room?.socket.send(
+              JSON.stringify({
+                type: "offer",
+                offer,
+              })
+            );
+            console.log(room);
+            console.log("sent");
+          }
+          break;
+
+        default:
+          break;
       }
     } catch (error) {
       console.log(error);
@@ -106,74 +152,3 @@ wss.on("connection", async function connection(ws, req) {
     broadcastOnlineUsers();
   });
 });
-
-// message Events
-// ws.on("message", async function message(data) {
-//   try {
-//     const parsedData = JSON.parse(data.toString());
-//     switch (parsedData.type) {
-//       case "statusUpdate":
-//         try {
-//           await db.user.update({
-//             where: { id: currentUserId },
-//             data: { Status: "online" },
-//           });
-//         } catch (error) {
-//           console.log(error);
-//         }
-//         //broadCast status
-//         broadcastStatus(currentUserId, "online");
-//       case "join":
-//         const room = rooms.find((x) => x.socket === ws);
-//         if (room) {
-//           room.roomId = parsedData.roomId;
-//         }
-//         rooms;
-
-//         break;
-//       case "chat":
-//         const { roomId, message, receiverId } = parsedData;
-//         const targetrooms = rooms.filter(
-//           (room) => room.roomId === roomId && room.socket != ws
-//         );
-//         if (targetrooms.length > 0) {
-//           targetrooms.map((room) => {
-//             room.socket.send(
-//               JSON.stringify({
-//                 message,
-//               })
-//             );
-//           });
-//           try {
-//             await db.chat.create({
-//               data: {
-//                 message,
-//                 senderId: currentUserId,
-//                 receiverId,
-//                 roomId,
-//                 Status: "Seen",
-//               },
-//             });
-//           } catch (error) {
-//             console.log(error);
-//           }
-//           return;
-//         }
-//         //if receiver is offliner
-//         try {
-//           await db.chat.create({
-//             data: {
-//               message,
-//               senderId: currentUserId,
-//               receiverId,
-//               roomId,
-//               Status: "Sent",
-//             },
-//           });
-//         } catch (error) {}
-//         break;
-//     }
-//   } catch (error) {
-//     console.log(error);
-//   }
-// });

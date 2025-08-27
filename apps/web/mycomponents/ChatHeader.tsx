@@ -1,23 +1,28 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import useSocket from "@/hooks/useSocket";
 import { useChatStore } from "@/store/useChatStore";
 import { useSocketStore } from "@/store/useSocketStore";
 
 import { MoreVertical, Phone, Video } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const ChatHeader = () => {
   const selectedUser = useChatStore((state) => state.selectedUser);
   const { onlineUsers } = useSocketStore();
+  const { socket } = useSocket();
+
+  const router = useRouter();
   if (!selectedUser) {
     return;
   }
   return (
-    <div className='p-4 border-b border-slate-700 bg-slate-800/50'>
-      <div className='flex items-center justify-between'>
-        <div className='flex items-center space-x-3'>
-          <div className='relative'>
-            <Avatar className='h-10 w-10'>
-              <AvatarFallback className='bg-gradient-to-r from-blue-500 to-cyan-500 text-white'>
+    <div className="p-4 border-b border-slate-700 bg-slate-800/50">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-3">
+          <div className="relative">
+            <Avatar className="h-10 w-10">
+              <AvatarFallback className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white">
                 {selectedUser?.username.charAt(0)}
               </AvatarFallback>
             </Avatar>
@@ -30,34 +35,46 @@ const ChatHeader = () => {
             />
           </div>
           <div>
-            <h3 className='text-white font-medium'>{selectedUser.username}</h3>
-            <p className='text-slate-400 text-sm capitalize'>
+            <h3 className="text-white font-medium">{selectedUser.username}</h3>
+            <p className="text-slate-400 text-sm capitalize">
               {onlineUsers.includes(selectedUser.id) ? "online" : "offline"}
             </p>
           </div>
         </div>
-        <div className='flex items-center space-x-2'>
+        <div className="flex items-center space-x-2">
           <Button
-            variant='ghost'
-            size='sm'
-            className='text-slate-400 hover:text-white hover:bg-slate-700'
+            variant="ghost"
+            size="sm"
+            className="text-slate-400 hover:text-white hover:bg-slate-700"
           >
-            <Phone className='h-4 w-4' />
+            <Phone className="h-4 w-4" />
           </Button>
           <Button
-            variant='ghost'
-            size='sm'
-            className='text-slate-400 hover:text-white hover:bg-slate-700'
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              socket?.send(
+                JSON.stringify({
+                  type: "Request-for-video-call",
+                  receiverId: selectedUser.id,
+                })
+              );
+              console.log("sent");
+              setTimeout(() => {
+                router.push(`/video/${selectedUser.id}`);
+              }, 5000);
+            }}
+            className="text-slate-400 hover:text-white hover:bg-slate-700"
           >
-            <Video className='h-4 w-4' />
+            <Video className="h-4 w-4" />
           </Button>
           <Button
-            variant='ghost'
-            size='sm'
+            variant="ghost"
+            size="sm"
             // onClick={onShowProfile}
-            className='text-slate-400 hover:text-white hover:bg-slate-700'
+            className="text-slate-400 hover:text-white hover:bg-slate-700"
           >
-            <MoreVertical className='h-4 w-4' />
+            <MoreVertical className="h-4 w-4" />
           </Button>
         </div>
       </div>
